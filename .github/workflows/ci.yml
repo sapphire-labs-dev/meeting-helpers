@@ -29,15 +29,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      # While @sapphirelabs/ui is used from a local folder ("file:../sapphire-ui"),
-      # fetch it next to this repository. Once the dependency is a version from
-      # npm, this step does nothing.
-      - name: Fetch @sapphirelabs/ui when used from a folder
-        run: |
-          if grep -q '"file:../sapphire-ui"' package.json; then
-            git clone --depth 1 https://github.com/sapphire-labs-dev/sapphire-ui.git ../sapphire-ui
-          fi
-
       - name: Install
         run: npm ci
 

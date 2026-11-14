@@ -48,13 +48,7 @@ There is no backend. Settings, names, cards and notes live in `localStorage`; PD
 
 Requires **Node.js 22.23 or newer** (24 LTS recommended; see `.nvmrc`).
 
-The layout, themes, shared components and browser helpers come from [`@sapphirelabs/ui`](https://github.com/sapphire-labs-dev/sapphire-ui). Until that package is published on npm, clone it next to this repository:
-
-```
-sapphirelabs/
-  meeting-helpers/   ← this repository
-  sapphire-ui/       ← git clone https://github.com/sapphire-labs-dev/sapphire-ui.git
-```
+The layout, themes, shared components and browser helpers come from [`@sapphirelabs/ui`](https://www.npmjs.com/package/@sapphirelabs/ui) ([source](https://github.com/sapphire-labs-dev/sapphire-ui)), installed from npm with the rest.
 
 ```bash
 npm install
