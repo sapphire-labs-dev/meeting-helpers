@@ -1,0 +1,129 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout titleKey="nav.pomodoro" title="Pomodoro tracker" description="A Pomodoro timer that tracks focus sessions per task and per day. Free, no login, nothing leaves your browser.">
+  <section class="wrap page">
+    <header class="page-head">
+      <h1 data-i18n="pomo.title">Pomodoro tracker</h1>
+      <p class="lead" data-i18n="pomo.lead"></p>
+    </header>
+
+    <div class="layout">
+      <div class="card timer focus-card" id="timer" data-state="ok">
+        <div class="segmented phases" role="radiogroup" data-i18n-title="pomo.phases">
+          <label><input type="radio" name="phase" value="focus" /><span data-i18n="pomo.phase.focus">Focus</span></label>
+          <label><input type="radio" name="phase" value="short" /><span data-i18n="pomo.phase.short">Short break</span></label>
+          <label><input type="radio" name="phase" value="long" /><span data-i18n="pomo.phase.long">Long break</span></label>
+        </div>
+        <div class="clock" id="clock" role="timer" aria-live="off">25:00</div>
+        <p class="clock-sub" id="clock-sub"></p>
+        <div class="bar" aria-hidden="true"><div class="bar-fill" id="bar-fill"></div></div>
+        <div class="controls">
+          <button type="button" class="btn big" id="toggle-btn"><span id="toggle-label">Start</span> <kbd>Space</kbd></button>
+          <button type="button" class="btn ghost" id="skip-btn"><span data-i18n="pomo.skip">Skip</span> <kbd>S</kbd></button>
+          <button type="button" class="btn ghost" id="restart-btn"><span data-i18n="pomo.restart">Restart</span> <kbd>R</kbd></button>
+          <button type="button" class="icon-btn" id="fs-btn" data-i18n-title="common.fullscreen">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+        <p class="cycle" id="cycle"><span class="dots" id="dots"></span> <span id="cycle-label"></span></p>
+        <p class="working" id="working"></p>
+      </div>
+
+      <div class="side">
+        <div class="card today">
+          <h2 class="section-label" data-i18n="pomo.today">Today</h2>
+          <div class="today-stats">
+            <p><b class="mono" id="today-count">0</b> <span class="muted" data-i18n="pomo.todayCount">pomodoros</span></p>
+            <p><b class="mono" id="today-time">0 min</b> <span class="muted" data-i18n="pomo.todayTime">of focus</span></p>
+          </div>
+          <h3 class="section-label week-label" data-i18n="pomo.week">Last 7 days</h3>
+          <ol class="week" id="week" data-i18n-title="pomo.week"></ol>
+        </div>
+
+        <div class="card">
+          <h2 class="section-label" data-i18n="pomo.tasks">Tasks</h2>
+          <form id="task-form" class="add-row">
+            <input type="text" id="task-input" autocomplete="off" maxlength="200" data-i18n-placeholder="pomo.taskAdd" />
+            <button type="submit" class="btn" data-i18n="common.add">Add</button>
+          </form>
+          <ul id="tasks" class="row-list tasks"></ul>
+          <p class="muted small" id="tasks-empty" data-i18n="pomo.tasksEmpty"></p>
+          <button type="button" class="link-btn small" id="clear-done" data-i18n="pomo.clearDone" hidden>Remove finished tasks</button>
+        </div>
+      </div>
+    </div>
+
+    <details class="card settings">
+      <summary class="section-label" data-i18n="pomo.settings">Settings</summary>
+      <div class="settings-grid">
+        <label class="field"><span data-i18n="pomo.focusMin">Focus (min)</span><input type="number" id="focus-min" min="1" max="180" step="1" inputmode="numeric" /></label>
+        <label class="field"><span data-i18n="pomo.shortMin">Short break (min)</span><input type="number" id="short-min" min="1" max="60" step="1" inputmode="numeric" /></label>
+        <label class="field"><span data-i18n="pomo.longMin">Long break (min)</span><input type="number" id="long-min" min="1" max="120" step="1" inputmode="numeric" /></label>
+        <label class="field"><span data-i18n="pomo.longEvery">Long break every</span><input type="number" id="long-every" min="2" max="12" step="1" inputmode="numeric" /></label>
+      </div>
+      <label class="toggle"><input type="checkbox" id="auto-start" /><span><b data-i18n="pomo.autoStart"></b><small data-i18n="pomo.autoStart.hint"></small></span></label>
+      <label class="toggle"><input type="checkbox" id="sound" /><span><b data-i18n="pomo.sound"></b><small data-i18n="pomo.sound.hint"></small></span></label>
+      <label class="toggle"><input type="checkbox" id="notify" /><span><b data-i18n="pomo.notify"></b><small data-i18n="pomo.notify.hint"></small></span></label>
+      <p class="error" id="notify-blocked" data-i18n="pomo.notifyBlocked" hidden></p>
+    </details>
+
+    <p class="muted small" data-i18n="pomo.shortcuts"></p>
+  </section>
+
+  <script>
+    import { initPomodoro } from '../features/pomodoro/pomodoro';
+    initPomodoro();
+  </script>
+</Layout>
+
+<style>
+  .layout { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 960px) { .layout { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+  .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+  .focus-card {
+    display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding: 28px 20px;
+    border-color: color-mix(in srgb, var(--state) 40%, var(--border));
+    background: radial-gradient(600px 300px at 50% 40%, color-mix(in srgb, var(--state) var(--state-glow, 10%), transparent), transparent 70%), var(--surface);
+  }
+  .clock { font-size: clamp(4.5rem, 16vw, 9rem); letter-spacing: -0.04em; margin-top: 6px; }
+  .clock-sub { margin: 0; color: var(--muted); min-height: 1.6em; }
+  .focus-card .bar { max-width: 520px; }
+  .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+  .cycle { margin: 0; color: var(--muted); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  .dots { display: inline-flex; gap: 5px; }
+  .dots :global(i) { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--border-strong); }
+  .dots :global(i.on) { background: var(--ok); border-color: var(--ok); }
+  .working { margin: 0; font-size: 1.05rem; max-width: 100%; overflow-wrap: anywhere; }
+  .working :global(b) { color: var(--text); }
+  .working.none { color: var(--muted); font-size: 0.9rem; }
+  /* Full screen: just the timer. */
+  :global(:fullscreen) .focus-card { min-height: 100vh; justify-content: center; border: 0; border-radius: 0; }
+
+  .today-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+  .today-stats p { margin: 0; }
+  .today-stats b { font-size: 1.8rem; margin-right: 4px; }
+  .week-label { margin-top: 18px; }
+  .week { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 110px; }
+  .week :global(li) { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .week :global(.col) { width: 100%; max-width: 28px; border-radius: 6px 6px 2px 2px; background: var(--accent-strong); min-height: 2px; }
+  .week :global(li.zero .col) { background: var(--chip); }
+  .week :global(li.today .col) { background: var(--ok); }
+  .week :global(.n) { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+  .week :global(.d) { font-size: 0.72rem; color: var(--muted); text-transform: capitalize; }
+
+  .tasks { margin-top: 12px; }
+  .tasks:empty { display: none; }
+  .tasks :global(li.done .row-input) { text-decoration: line-through; color: var(--muted); }
+  #tasks-empty { margin: 10px 0 0; }
+  #clear-done { margin-top: 10px; }
+
+  .settings { margin-top: 20px; }
+  .settings summary { cursor: pointer; margin: 0; }
+  .settings[open] summary { margin-bottom: 16px; }
+  .settings-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 14px; }
+  .settings .toggle { margin-top: 10px; }
+  .page > .muted.small { margin-top: 18px; }
+</style>

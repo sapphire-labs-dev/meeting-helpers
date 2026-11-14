@@ -1,0 +1,51 @@
+---
+import Hero from '@sapphirelabs/ui/components/Hero.astro';
+import ToolCard from '@sapphirelabs/ui/components/ToolCard.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <Hero
+    eyebrow="// meeting helpers" eyebrowKey="home.eyebrow"
+    title="Keep your meetings on time." titleKey="home.title"
+    lead="Free, no login, nothing leaves your browser. Open it, share your screen and let the clock do the awkward part." leadKey="home.lead"
+  />
+
+  <section class="wrap tool-grid">
+    <ToolCard
+      href="/daily"
+      title="Daily timer" titleKey="home.daily.title"
+      body="Split the meeting time across the team, shuffle the order and show a big countdown everyone can see." bodyKey="home.daily.body"
+      cta="Start a daily" ctaKey="home.daily.cta"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+    </ToolCard>
+
+    <ToolCard
+      href="/present"
+      title="Presentation timer" titleKey="home.present.title"
+      body="Upload your deck as PDF, list the topics with their time and present with a timer and private notes only you can see." bodyKey="home.present.body"
+      cta="Plan a presentation" ctaKey="home.present.cta"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>
+    </ToolCard>
+
+    <ToolCard
+      href="/retro"
+      title="Retrospective board" titleKey="home.retro.title"
+      body="Run the retro from one shared screen: paste the team’s points from the chat, vote, and leave with action items." bodyKey="home.retro.body"
+      cta="Run a retro" ctaKey="home.retro.cta"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>
+    </ToolCard>
+
+    <ToolCard
+      href="/pomodoro"
+      title="Pomodoro tracker" titleKey="home.pomodoro.title"
+      body="Focus in 25-minute blocks with short breaks, track pomodoros per task and see how your day went." bodyKey="home.pomodoro.body"
+      cta="Start focusing" ctaKey="home.pomodoro.cta"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 5c0-1.5 1-2.5 2.5-3M9.5 3.5 12 5l2.5-1.5M12 9v4h3"/></svg>
+    </ToolCard>
+  </section>
+</Layout>

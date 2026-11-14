@@ -1,0 +1,140 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout titleKey="nav.retro" title="Retrospective board" description="Run a team retrospective from one shared screen: paste points from the call chat, vote, and export action items as Markdown. Free, no login.">
+  <!-- ───────────── List ───────────── -->
+  <section id="list" class="wrap page">
+    <header class="page-head">
+      <h1 data-i18n="retro.title">Retrospective board</h1>
+      <p class="lead" data-i18n="retro.lead"></p>
+    </header>
+
+    <form id="new-form" class="card new-retro">
+      <h2 class="section-label" data-i18n="retro.new">New retro</h2>
+      <label class="field"><span data-i18n="retro.name">Name</span><input type="text" id="new-name" maxlength="80" autocomplete="off" data-i18n-placeholder="retro.namePlaceholder" /></label>
+      <fieldset>
+        <legend class="field-legend" data-i18n="retro.format">Format</legend>
+        <div class="opt-grid formats">
+          <label class="opt"><input type="radio" name="template" value="wwi" checked /><b data-i18n="retro.tpl.wwi">Went well / To improve</b><small data-i18n="retro.tpl.wwi.hint"></small></label>
+          <label class="opt"><input type="radio" name="template" value="ssc" /><b data-i18n="retro.tpl.ssc">Start / Stop / Continue</b><small data-i18n="retro.tpl.ssc.hint"></small></label>
+          <label class="opt"><input type="radio" name="template" value="msg" /><b data-i18n="retro.tpl.msg">Mad / Sad / Glad</b><small data-i18n="retro.tpl.msg.hint"></small></label>
+          <label class="opt"><input type="radio" name="template" value="4l" /><b data-i18n="retro.tpl.4l">The 4 Ls</b><small data-i18n="retro.tpl.4l.hint"></small></label>
+        </div>
+      </fieldset>
+      <button type="submit" class="btn big" data-i18n="retro.create">Create board</button>
+    </form>
+
+    <h2 class="section-label" id="retros-label" data-i18n="retro.yours" hidden>Your retros</h2>
+    <ul class="row-list retros" id="retros"></ul>
+  </section>
+
+  <!-- ───────────── Board ───────────── -->
+  <section id="board" class="board-view" hidden>
+    <div class="wrap board-head">
+      <button type="button" class="link-btn" id="back-btn" data-i18n="retro.back">← All retros</button>
+      <div class="board-title">
+        <input type="text" id="board-name" class="title-input" maxlength="80" data-i18n-title="retro.name" />
+        <span class="muted small" id="board-date"></span>
+      </div>
+      <div class="toolbar">
+        <label class="toggle sort"><input type="checkbox" id="sort-votes" /><span data-i18n="retro.sortVotes">Most voted first</span></label>
+        <button type="button" class="btn small ghost" id="copy-md"><span data-label data-i18n="retro.copyMd">Copy as Markdown</span></button>
+        <button type="button" class="btn small ghost" id="download-md" data-i18n="retro.downloadMd">Download .md</button>
+        <button type="button" class="btn small" id="focus-btn" data-i18n="retro.focus">Presentation mode</button>
+        <button type="button" class="btn small ghost danger-btn" id="delete-btn" data-i18n="retro.delete">Delete</button>
+      </div>
+      <p class="muted small tip" data-i18n="retro.tip"></p>
+    </div>
+
+    <div class="columns" id="columns"></div>
+
+    <div class="wrap actions-wrap">
+      <div class="card">
+        <h2 class="section-label" data-i18n="retro.actions">Action items</h2>
+        <ul class="row-list actions" id="actions"></ul>
+        <p class="muted small" id="actions-empty" data-i18n="retro.actionsEmpty"></p>
+        <form id="action-form" class="add-row">
+          <input type="text" id="action-input" maxlength="300" autocomplete="off" data-i18n-placeholder="retro.actionAdd" />
+          <button type="submit" class="btn" data-i18n="common.add">Add</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initRetro } from '../features/retro/retro';
+    initRetro();
+  </script>
+</Layout>
+
+<style>
+  .new-retro { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+  .new-retro .section-label { margin: 0; }
+  .new-retro fieldset { margin: 0; }
+  .field-legend { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; padding: 0; }
+  .new-retro .btn { align-self: flex-start; }
+  .formats { grid-auto-flow: row; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .formats .opt b { white-space: normal; }
+  #retros-label { margin-top: 36px; }
+  .retros :global(li) { padding: 8px 8px 8px 14px; gap: 10px; flex-wrap: wrap; }
+  .retros :global(.r-name) { flex: 1; min-width: 160px; font-weight: 600; overflow-wrap: anywhere; }
+  .retros :global(.r-meta) { color: var(--muted); font-size: 0.85rem; }
+
+  /* ── Board ── */
+  .board-view { padding-top: 16px; }
+  .board-head { display: flex; flex-direction: column; gap: 12px; }
+  .board-head .link-btn { align-self: flex-start; }
+  .board-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .title-input {
+    font: inherit; font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text);
+    background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 2px 8px; margin-left: -8px; min-width: 0; flex: 1 1 280px;
+  }
+  .title-input:hover { border-color: var(--border); }
+  .title-input:focus { outline: none; border-color: var(--accent); }
+  .sort { align-items: center; font-size: 0.9rem; }
+  .sort input { margin-top: 0; }
+  .danger-btn:hover { color: var(--danger); border-color: var(--danger); background: transparent; }
+  .tip { margin: 0; max-width: 90ch; }
+
+  .columns {
+    display: grid; gap: 14px; padding: 20px 16px 8px; margin: 0 auto; max-width: 1600px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 760px) { .columns { grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); padding: 20px 24px 8px; } }
+  .columns :global(.column) { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; }
+  .columns :global(.col-head) { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .columns :global(.col-head h2) { margin: 0; font-size: 1.1rem; }
+  .columns :global(.col-count) { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+  .columns :global(.cards) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .columns :global(.retro-card) {
+    display: flex; flex-direction: column; gap: 4px; padding: 8px 8px 4px; border-radius: 10px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .columns :global(.retro-card.voted) { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+  .columns :global(.card-text) {
+    font: inherit; font-size: 0.98rem; line-height: 1.4; color: var(--text); background: transparent; resize: none; width: 100%;
+    border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; field-sizing: content; min-height: 2.1em; overflow: hidden;
+  }
+  .columns :global(.card-text:hover) { border-color: var(--border); }
+  .columns :global(.card-text:focus) { outline: none; border-color: var(--accent); background: var(--bg); }
+  .columns :global(.card-bar) { display: flex; align-items: center; gap: 2px; }
+  .columns :global(.votes) { display: inline-flex; align-items: center; gap: 2px; margin-right: auto; }
+  .columns :global(.votes b) { font-family: var(--font-mono); min-width: 1.6em; text-align: center; font-size: 0.9rem; }
+  .columns :global(.votes b.zero) { color: var(--muted); font-weight: 400; }
+  .columns :global(.row-btn) { width: 28px; height: 28px; }
+  .columns :global(.empty) { color: var(--muted); font-size: 0.85rem; margin: 0; padding: 6px 2px; }
+
+  .actions-wrap { margin-top: 20px; }
+  .actions :global(.owner) { flex: 0 1 150px; min-width: 80px; }
+  .actions :global(li.done .row-input:not(.owner)) { text-decoration: line-through; color: var(--muted); }
+  .actions:empty { display: none; }
+  #actions-empty { margin: 0 0 12px; }
+  #actions-empty[hidden] + .add-row, .actions + p[hidden] + .add-row { margin-top: 12px; }
+
+  /* Presentation mode: no site chrome, bigger cards for the shared screen. */
+  :global(body.running) .board-view { padding-top: 20px; }
+  :global(body.running) .tip, :global(body.running) .board-head .link-btn { display: none; }
+  :global(body.running) .columns :global(.card-text) { font-size: 1.15rem; }
+  :global(body.running) .columns :global(.col-head h2) { font-size: 1.35rem; }
+</style>

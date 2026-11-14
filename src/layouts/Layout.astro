@@ -1,0 +1,29 @@
+---
+// The site's page shell: the shared Sapphire Labs layout with this site's
+// name, menu and strings.
+import SiteLayout, { type NavItem } from '@sapphirelabs/ui/SiteLayout.astro';
+import { dict, type Key } from '../i18n';
+
+interface Props {
+  title?: string;
+  description?: string;
+  titleKey?: Key;
+}
+
+const nav: NavItem[] = [
+  { href: '/daily', key: 'nav.daily', label: 'Daily timer' },
+  { href: '/present', key: 'nav.present', label: 'Presentation timer' },
+  { href: '/retro', key: 'nav.retro', label: 'Retro board' },
+  { href: '/pomodoro', key: 'nav.pomodoro', label: 'Pomodoro' },
+];
+
+const {
+  title,
+  description = 'Free tools to keep your meetings on time. No login, everything stays in your browser.',
+  titleKey = 'title.home',
+} = Astro.props;
+---
+
+<SiteLayout siteName="Meeting Helpers" {dict} {nav} {title} {description} {titleKey}>
+  <slot />
+</SiteLayout>

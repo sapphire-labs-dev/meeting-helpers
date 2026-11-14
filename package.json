@@ -1,0 +1,38 @@
+{
+  "name": "sapphire-meeting-helpers",
+  "description": "Sapphire Labs meeting helpers: daily timer and presentation timer. Free, no login, everything stays in the browser.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "homepage": "https://meet.sapphire-labs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sapphire-labs-dev/meeting-helpers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sapphire-labs-dev/meeting-helpers/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@sapphirelabs/ui": "file:../sapphire-ui",
+    "astro": "^7.4.12",
+    "pdfjs-dist": "^6.5.438"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/node": "^24.19.2",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

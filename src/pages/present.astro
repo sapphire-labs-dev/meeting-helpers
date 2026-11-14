@@ -1,0 +1,304 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout titleKey="nav.present" title="Presentation timer" description="Upload your slides as PDF, plan timed topics and present with a timer and private speaker notes. Free, no login.">
+  <!-- ───────────── Library ───────────── -->
+  <section id="library" class="wrap page">
+    <header class="page-head">
+      <h1 data-i18n="lib.title">Presentation timer</h1>
+      <p class="lead" data-i18n="lib.lead"></p>
+    </header>
+
+    <div id="lib-resume" class="card banner" hidden>
+      <span data-i18n="lib.resume"></span>
+      <span class="banner-actions">
+        <button type="button" class="btn small" id="lib-resume-btn" data-i18n="common.resume">Resume</button>
+        <button type="button" class="btn small ghost" id="lib-discard-btn" data-i18n="common.discard">Discard</button>
+      </span>
+    </div>
+
+    <label class="drop" id="drop">
+      <input type="file" id="file-input" accept="application/pdf,.pdf" hidden />
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <b id="drop-label" data-i18n="lib.drop"></b>
+      <span class="muted small" data-i18n="lib.dropHint"></span>
+    </label>
+    <p id="lib-error" class="error" role="alert" hidden></p>
+
+    <h2 class="section-label" id="deck-list-label" data-i18n="lib.yours" hidden></h2>
+    <ul id="deck-list" class="deck-list"></ul>
+  </section>
+
+  <!-- ───────────── Editor ───────────── -->
+  <section id="editor" class="wrap page editor" hidden>
+    <button type="button" class="link-btn" id="ed-back" data-i18n="ed.back"></button>
+    <p id="ed-missing" class="error" role="alert" data-i18n="lib.missing" hidden></p>
+
+    <div class="ed-head card">
+      <label class="field grow"><span data-i18n="ed.name"></span><input type="text" id="ed-name" maxlength="80" /></label>
+      <label class="field"><span data-i18n="ed.total"></span><input type="number" id="ed-total" min="1" max="600" step="1" inputmode="numeric" /></label>
+      <div class="ed-actions">
+        <button type="button" class="btn" id="ed-present" data-i18n="ed.present"></button>
+      </div>
+      <p class="ed-sum" id="ed-sum"></p>
+    </div>
+
+    <div class="ed-grid">
+      <div>
+        <h2 class="section-label" data-i18n="ed.topics"></h2>
+        <div class="card topics-card">
+          <p class="muted small topics-empty" id="topics-empty" data-i18n="ed.topicsEmpty"></p>
+          <ol id="topic-list" class="row-list topic-list"></ol>
+          <form id="topic-add" class="add-row">
+            <input type="text" id="topic-input" autocomplete="off" data-i18n-placeholder="ed.topicAdd" />
+            <button type="submit" class="btn small" data-i18n="common.add"></button>
+          </form>
+        </div>
+      </div>
+      <div>
+        <h2 class="section-label" data-i18n="ed.slides"></h2>
+        <p class="muted small hint" data-i18n="ed.slidesHint"></p>
+        <div id="slide-panel" class="card slide-panel" hidden>
+          <b id="sp-title"></b>
+          <label class="field"><span data-i18n="ed.slideNotes"></span><textarea id="sp-notes" rows="3"></textarea></label>
+        </div>
+        <ol id="slide-grid" class="slide-grid"></ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── Presenter ───────────── -->
+  <section id="presenter" class="presenter timer" hidden>
+    <div class="pr-top">
+      <div class="pr-title">
+        <span class="muted small" id="pr-topic-pos"></span>
+        <b id="pr-deck-name"></b>
+      </div>
+      <div class="pr-totals">
+        <span><span class="muted small" data-i18n="pr.elapsed"></span> <b class="mono" id="pr-elapsed"></b></span>
+        <span><span class="muted small" id="pr-remaining-label"></span> <b class="mono" id="pr-remaining"></b></span>
+        <span class="pace" id="pr-pace"></span>
+      </div>
+      <div class="pr-actions">
+        <span class="aud-status" id="aud-status"><i></i><span id="aud-status-label"></span></span>
+        <button type="button" class="btn small" id="pr-open" data-i18n="pr.open"></button>
+        <button type="button" class="btn small ghost" id="pr-pause"></button>
+        <button type="button" class="icon-btn" id="pr-fs" data-i18n-title="common.fullscreen">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+        <button type="button" class="btn small ghost" id="pr-end" data-i18n="pr.end"></button>
+      </div>
+    </div>
+    <p class="popup-blocked" id="pr-blocked" hidden>
+      <span data-i18n="pr.popupBlocked"></span> <a id="pr-blocked-link" target="_blank" rel="noopener"></a>
+    </p>
+
+    <div class="pr-main">
+      <div class="pr-slide-col">
+        <div class="pr-stage" id="pr-stage"><canvas id="pr-canvas"></canvas></div>
+        <div class="pr-nav">
+          <button type="button" class="btn ghost" id="pr-prev"><kbd>←</kbd> <span data-i18n="pr.prev"></span></button>
+          <span class="mono muted" id="pr-slide-pos"></span>
+          <button type="button" class="btn" id="pr-next"><span data-i18n="pr.next"></span> <kbd>→</kbd></button>
+        </div>
+      </div>
+      <aside class="pr-side">
+        <div class="card topic-clock">
+          <span class="clock-label" id="pr-clock-label"></span>
+          <div class="clock" id="pr-clock"></div>
+          <span class="muted small" id="pr-clock-sub"></span>
+          <div class="bar" aria-hidden="true"><div class="bar-fill" id="pr-bar"></div></div>
+        </div>
+        <div class="card next-card">
+          <span class="muted small" id="pr-next-label"></span>
+          <div class="next-thumb"><canvas id="pr-next-canvas"></canvas></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="pr-notes">
+      <div>
+        <div class="topics-head">
+          <h3 class="section-label" data-i18n="pr.topics"></h3>
+          <span class="topic-nav">
+            <button type="button" class="btn small ghost" id="pr-topic-prev" data-i18n="pr.prevTopic"></button>
+            <button type="button" class="btn small" id="pr-topic-next"><span data-i18n="pr.nextTopic"></span> <kbd>T</kbd></button>
+          </span>
+        </div>
+        <ol class="pr-topics" id="pr-topics"></ol>
+      </div>
+      <div>
+        <h3 class="section-label" data-i18n="pr.notes"></h3>
+        <p class="slide-notes" id="pr-slide-notes"></p>
+      </div>
+      <p class="muted small shortcuts" data-i18n="pr.shortcuts"></p>
+    </footer>
+  </section>
+
+  <!-- ───────────── Summary ───────────── -->
+  <section id="psummary" class="wrap summary-page" hidden>
+    <h1 data-i18n="ps.title"></h1>
+    <div class="sum-stats">
+      <div class="card stat">
+        <span class="muted small" data-i18n="common.totalTime"></span>
+        <b class="mono" id="ps-total"></b>
+        <span class="muted small" id="ps-planned"></span>
+      </div>
+      <div class="card stat verdict-card" id="ps-verdict-card"><b class="verdict" id="ps-verdict"></b></div>
+    </div>
+    <div class="card table-card">
+      <table class="sum-table">
+        <thead><tr><th data-i18n="ps.topic"></th><th data-i18n="ps.used"></th><th data-i18n="ps.planned"></th><th class="bar-col"></th></tr></thead>
+        <tbody id="ps-rows"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn big" id="ps-back" data-i18n="ps.back"></button>
+  </section>
+
+  <script>
+    import { initPresent } from '../features/present/present';
+    initPresent();
+  </script>
+</Layout>
+
+<style>
+  /* Shared pieces (lists, timer states, summary, fields) come from @sapphirelabs/ui. */
+  .editor { padding-top: 16px; }
+  .editor .link-btn { margin-bottom: 18px; }
+
+  /* ── Library ── */
+  .drop {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; cursor: pointer;
+    padding: 40px 20px; border: 2px dashed var(--border-strong); border-radius: 16px; background: var(--surface-2);
+    color: var(--accent); transition: border-color 0.2s, background 0.2s;
+  }
+  .drop b { color: var(--text); font-size: 1.1rem; }
+  .drop .small { max-width: 60ch; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent-strong) 8%, var(--surface-2)); }
+  .drop.busy { pointer-events: none; opacity: 0.7; }
+  #deck-list-label { margin-top: 36px; }
+  .deck-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .deck-list :global(li) { display: flex; flex-direction: column; gap: 10px; }
+  .deck-list :global(.cover) {
+    aspect-ratio: 16 / 9; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .deck-list :global(.cover canvas) { max-width: 100%; max-height: 100%; }
+  .deck-list :global(h3) { margin: 0; font-size: 1.05rem; overflow-wrap: anywhere; }
+  .deck-list :global(.meta) { color: var(--muted); font-size: 0.85rem; margin: 0; }
+  .deck-list :global(.row) { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Editor ── */
+  .ed-head { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin: 12px 0 28px; }
+  .ed-head .grow { flex: 1 1 260px; }
+  .ed-head .field:not(.grow) { width: 150px; }
+  .ed-head input[type='number'] { font-family: var(--font-mono); }
+  .ed-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ed-sum { flex-basis: 100%; margin: 0; font-size: 0.9rem; color: var(--ok); }
+  .ed-sum.off { color: var(--warn); }
+  .ed-grid { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+  .ed-grid > div { min-width: 0; }
+  @media (min-width: 960px) { .ed-grid { grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr); align-items: start; } }
+  .topics-card { display: flex; flex-direction: column; gap: 10px; }
+  .topics-empty { margin: 0; }
+  .topic-list :global(.t-min) { width: 66px; padding: 5px 8px; font-family: var(--font-mono); font-size: 0.85rem; text-align: right; }
+  .topic-list :global(.t-unit) { font-size: 0.78rem; color: var(--muted); margin-right: 2px; }
+  /* Phones: topic text on its own line, minutes and buttons below. */
+  @media (max-width: 520px) {
+    .topics-card { padding: 14px; }
+    .topic-list :global(li) { flex-wrap: wrap; row-gap: 2px; }
+    .topic-list :global(.row-input) { flex-basis: calc(100% - 2.2em); }
+    .topic-list :global(.t-min) { margin-left: 1.9em; }
+  }
+
+  .hint { margin: -6px 0 12px; }
+  .slide-panel { margin-bottom: 18px; display: flex; flex-direction: column; gap: 10px; border-color: var(--accent); }
+  .slide-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .slide-grid :global(button) {
+    width: 100%; font: inherit; color: var(--text); text-align: left; cursor: pointer; padding: 0; border: 0; background: none;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .slide-grid :global(.thumb) {
+    aspect-ratio: 16 / 9; display: grid; place-items: center; background: var(--surface-2); border-radius: 8px; overflow: hidden;
+    outline: 1px solid var(--border); transition: outline-color 0.15s;
+  }
+  .slide-grid :global(button:hover .thumb) { outline-color: var(--border-strong); }
+  .slide-grid :global(li.sel .thumb) { outline: 2px solid var(--accent); }
+  .slide-grid :global(.thumb canvas) { max-width: 100%; max-height: 100%; }
+  .slide-grid :global(.cap) { display: flex; gap: 6px; font-size: 0.78rem; align-items: baseline; min-width: 0; padding: 0 2px; }
+  .slide-grid :global(.cap b) { font-family: var(--font-mono); color: var(--muted); font-weight: 500; flex: none; }
+  .slide-grid :global(.cap span) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .slide-grid :global(.note-dot) { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; align-self: center; margin-left: auto; }
+
+  /* ── Presenter ── */
+  .presenter { min-height: 100vh; display: flex; flex-direction: column; }
+  .pr-top {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap;
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+  }
+  .pr-title { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+  .pr-title b { font-size: 1.1rem; overflow-wrap: anywhere; }
+  .pr-totals { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
+  .pr-totals b { font-size: 1.15rem; }
+  .pr-totals .over b, b.over { color: var(--danger); }
+  .pace { font-size: 0.8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; color: var(--ok); }
+  .pace.behind { color: var(--danger); }
+  .pace.ahead { color: var(--accent); }
+  .pr-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .aud-status { display: inline-flex; gap: 6px; align-items: center; font-size: 0.8rem; color: var(--muted); }
+  .aud-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
+  .aud-status.on i { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); }
+  .popup-blocked { margin: 0; padding: 10px 20px; background: color-mix(in srgb, var(--warn) 12%, var(--surface)); font-size: 0.9rem; overflow-wrap: anywhere; }
+
+  .pr-main { flex: 1; display: grid; gap: 16px; padding: 16px 20px; grid-template-columns: 1fr; min-height: 0; }
+  @media (min-width: 980px) { .pr-main { grid-template-columns: minmax(0, 1fr) 320px; } }
+  .pr-slide-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .pr-stage {
+    flex: 1; min-height: 240px; height: 52vh; display: grid; place-items: center; border-radius: 12px; overflow: hidden;
+    background: #000; border: 1px solid var(--border);
+  }
+  .pr-nav { display: flex; justify-content: center; align-items: center; gap: 16px; }
+  .pr-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .topic-clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 18px; border-color: color-mix(in srgb, var(--state) 45%, var(--border)); }
+  .clock { font-size: clamp(3rem, 6vw, 4.4rem); letter-spacing: -0.03em; }
+  .topic-clock .bar { height: 6px; margin-top: 12px; }
+  .next-card { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .next-thumb { aspect-ratio: 16 / 9; display: grid; place-items: center; background: #000; border-radius: 6px; overflow: hidden; }
+  .next-thumb canvas { max-width: 100%; max-height: 100%; }
+
+  .pr-notes {
+    display: grid; gap: 12px 28px; grid-template-columns: 1fr; padding: 16px 20px 20px;
+    border-top: 1px solid var(--border); background: var(--surface-2);
+  }
+  @media (min-width: 820px) { .pr-notes { grid-template-columns: 1fr 1fr; } }
+  .pr-notes .section-label { margin-bottom: 8px; }
+  .topics-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .topics-head .section-label { margin: 0; }
+  .topic-nav { display: flex; gap: 6px; }
+  .pr-topics { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .pr-topics :global(button) {
+    width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; font: inherit; font-size: 1.02rem;
+    padding: 7px 10px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text);
+  }
+  .pr-topics :global(button:hover) { background: var(--surface); }
+  .pr-topics :global(.mark) {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); border: 1px solid var(--border-strong);
+  }
+  .pr-topics :global(.txt) { flex: 1; min-width: 0; }
+  .pr-topics :global(.tt) { flex: none; font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); }
+  .pr-topics :global(li.cur button) { background: var(--chip); border-color: color-mix(in srgb, var(--state) 55%, transparent); font-weight: 600; }
+  .pr-topics :global(li.cur .mark) { background: var(--state); border-color: var(--state); color: #0b0d12; }
+  .pr-topics :global(li.cur .tt) { color: var(--state); }
+  .pr-topics :global(li.done .txt) { color: var(--muted); }
+  .pr-topics :global(li.done .mark) { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, transparent); }
+  .pr-topics :global(li.done .tt.over) { color: var(--danger); }
+  .pr-topics :global(li.done .tt.ok) { color: var(--ok); }
+  .pr-topics :global(.empty) { color: var(--muted); font-size: 0.9rem; padding: 4px 0; }
+  .clock-label { font-size: 0.85rem; color: var(--muted); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+
+  .slide-notes { margin: 0; white-space: pre-wrap; font-size: 1.05rem; }
+  .slide-notes.empty { color: var(--muted); font-size: 0.9rem; }
+  .shortcuts { margin: 0; grid-column: 1 / -1; }
+</style>
