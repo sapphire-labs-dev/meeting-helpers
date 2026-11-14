@@ -6,7 +6,7 @@
 Free tools to keep meetings on time and focused: a **daily stand-up timer**, a **presentation timer**, a **retrospective board** and a **Pomodoro tracker**.
 No sign-up, no server, no tracking: everything you type stays in your browser.
 
-**Use it:** https://meet.sapphire-labs.dev · English and Portuguese · dark, light and pink themes
+**Use it:** https://meeting-helpers.vercel.app · English and Portuguese · dark, light and pink themes
 
 | Daily timer | Presentation timer |
 |---|---|

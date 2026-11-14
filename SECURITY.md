@@ -13,7 +13,7 @@ This is a small project maintained in spare time: we will look at every report a
 
 ## Supported versions
 
-Only the latest version on the `main` branch (the one deployed at https://meet.sapphire-labs.dev) receives fixes.
+Only the latest version on the `main` branch (the one deployed at https://meeting-helpers.vercel.app) receives fixes.
 
 ## What is already in place
 
